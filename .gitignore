@@ -1,0 +1,40 @@
+# ========================
+# Python & Environnement
+# ========================
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# ========================
+# Numba Cache
+# ========================
+# Numba compile en machine code et met en cache, il ne faut pas le versionner
+*__pycache__/*
+*.numba_cache
+
+# ========================
+# IDE & OS
+# ========================
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ========================
+# Données et Résultats
+# ========================
+# On ignore le contenu des dossiers data et results, sauf d'éventuels fichiers d'exemple
+/data/*
+!/data/dummy_instance_example.json
+/results/*
+!/results/.gitkeep
+
+# Logs et Profiling
+*.log
+*.prof
+*.lprof
