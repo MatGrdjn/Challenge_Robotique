@@ -2,7 +2,7 @@ import math
 import time
 import numpy as np
 from .base_solver import BaseSolver
-from src.utils_solver import fast_random_rollout
+from utils_solver import fast_random_rollout
 
 class MCTSSolver(BaseSolver):
     def __init__(self, iterations=100000, exploration_constant=1.414, time_limit=None):
