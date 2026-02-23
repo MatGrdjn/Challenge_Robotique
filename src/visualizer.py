@@ -75,7 +75,7 @@ class RouteVisualizer:
                 face_color, edge_color = '#bdc3c7', '#7f8c8d'
                 label_prefix = "Ignoré"
 
-            visual_radius = 0.3 + (mass * 0.1)
+            visual_radius = 0.5
             circle = patches.Circle((cx, cy), visual_radius, facecolor=face_color, edgecolor=edge_color, 
                                     linewidth=2, alpha=0.8, zorder=2)
             ax.add_patch(circle)
@@ -96,5 +96,5 @@ class RouteVisualizer:
 
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         #plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"Visualisation sauvegardée dans : '{'save_path}'")
-        #plt.show()
+        print(f"Visualisation sauvegardée dans : '{save_path}'")
+        plt.show()

@@ -2,6 +2,7 @@ import os
 import time
 import numpy as np
 import concurrent.futures
+from utils_solver import set_numba_seed
 
 def _worker_task(solver_class, solver_kwargs, cylinders, seed):
     """
@@ -9,6 +10,7 @@ def _worker_task(solver_class, solver_kwargs, cylinders, seed):
     Le seed unique garantit que chaque MCTS explore des branches différentes
     """
     np.random.seed(seed)
+    set_numba_seed(seed)
     solver = solver_class(**solver_kwargs)
     return solver.solve(cylinders)
 

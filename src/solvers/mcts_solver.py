@@ -5,21 +5,21 @@ from .base_solver import BaseSolver
 from utils_solver import fast_random_rollout
 
 class MCTSSolver(BaseSolver):
-    def __init__(self, iterations=100000, exploration_constant=1.414, time_limit=None):
-        """
-        :param iterations: Nombre de simulations (rollouts) à effectuer.
-        :param exploration_constant: Constante C (généralement sqrt(2) = 1.414)
-        :param time_limit: Temps maximum alloué en secondes (optionnel)
-        """
+    def __init__(self, iterations=100000, exploration_constant=1.414, time_limit=None, fitness_mode=0):
+
         self.iterations = iterations
         self.C = exploration_constant
         self.time_limit = time_limit
+        self.fitness_mode = fitness_mode
         
         self.tree = {}
         self.n_cylinders = 0
         
         self.global_min_score = float('inf')
         self.global_max_score = -float('inf')
+
+        self.rollout_buffer = np.zeros(20, dtype=np.int32)
+        self.full_path_buffer = np.zeros(20, dtype=np.int32)
 
     def solve(self, cylinders):
         self.n_cylinders = len(cylinders)
@@ -41,7 +41,11 @@ class MCTSSolver(BaseSolver):
             path_list = list(node_state)
 
             while not self.tree[node_state][2] and len(node_state) < self.n_cylinders:
-                node_state = self._select_best_child(node_state)
+                best_child = self._select_best_child(node_state)
+                if best_child is None:
+                    break
+
+                node_state = best_child
                 path_list = list(node_state)
                 
             #Expansion
@@ -56,9 +60,14 @@ class MCTSSolver(BaseSolver):
                 self.tree[node_state] = [0, 0.0, untried]
                 
             #Rollout
-            prefix_array = np.array(path_list, dtype=np.int32)
-            score, full_path = fast_random_rollout(prefix_array, cylinders)
+            prefix_len = len(path_list)
+            for k in range(prefix_len):
+                self.rollout_buffer[k] = path_list[k]
+            score = fast_random_rollout(self.rollout_buffer, prefix_len, self.full_path_buffer, cylinders, self.fitness_mode)
             
+            if math.isnan(score) or math.isinf(score):
+                continue
+
             if score < self.global_min_score:
                 self.global_min_score = score
             if score > self.global_max_score:
@@ -66,7 +75,7 @@ class MCTSSolver(BaseSolver):
                 
             if score > best_overall_score:
                 best_overall_score = score
-                best_overall_path = full_path.copy()
+                best_overall_path = self.full_path_buffer.copy()
 
 
             #Backpropagation
@@ -85,7 +94,7 @@ class MCTSSolver(BaseSolver):
 
         elapsed = time.time() - start_time
         print(f"MCTS terminé: {i+1} itérations en {elapsed:.2f}s")
-        print(f"Meilleur score trouvé : {best_overall_score:,.2f}")
+        print(f"Meilleur score trouvé : {best_overall_score:_.2f}")
         
         return best_overall_path.tolist(), best_overall_score
 
