@@ -22,60 +22,61 @@ def main():
     RESULTS_DIR = "results"    
     UNITY_EXE = "C:/Users/Utilisateur/Documents/CoursCI2/Challenge/RunTime-2026-ultimate/challenge-robotique.exe"
 
-    target_map = "donnees-map1.txt"
+    # target_map = "donnees-map1.txt"
+    target_map = None
     
     pipeline = EvaluationPipeline(DATA_DIR, RESULTS_DIR, UNITY_EXE)
 
 
     
-    # pipeline.add_solver(
-    #     name="SA",
-    #     solver_class=SASolver,
-    #     params={
-    #         't_init': 10000.0, 't_final': 0.001, 'alpha': 0.9999, 
-    #         'time_limit': 300.0, 'fitness_mode': 1
-    #     }
-    # )
+    pipeline.add_solver(
+        name="SA",
+        solver_class=SASolver,
+        params={
+            't_init': 10000.0, 't_final': 0.001, 'alpha': 0.99999, 
+            'time_limit': 900.0, 'fitness_mode': 1
+        }
+    )
     
-    # pipeline.add_solver(
-    #     name="BeamSearch",
-    #     solver_class=BeamSearchSolver,
-    #     params={
-    #         "beam_width" : 100_000,
-    #         "fitness_mode" : 1
-    #     }
-    # )
+    pipeline.add_solver(
+        name="BeamSearch",
+        solver_class=BeamSearchSolver,
+        params={
+            "beam_width" : 500_000,
+            "fitness_mode" : 1
+        }
+    )
 
-    # pipeline.add_solver(
-    #     name="GA",
-    #     solver_class=GASolver,
-    #     params={
-    #         "pop_size" : 2000, "generations" : 5000, "tournament_size" : 20, 
-    #         "mutation_rate" : 0.3, "elitism_ratio" : 0.05, "time_limit" : 900,
-    #         "fitness_mode" : 1
-    #     }
-    # )
+    pipeline.add_solver(
+        name="GA",
+        solver_class=GASolver,
+        params={
+            "pop_size" : 2000, "generations" : 5000, "tournament_size" : 20, 
+            "mutation_rate" : 0.3, "elitism_ratio" : 0.05, "time_limit" : 900,
+            "fitness_mode" : 1
+        }
+    )
 
-    # pipeline.add_solver(
-    #     name="MCTS",
-    #     solver_class=MCTSSolver,
-    #     params={"iterations" : 1_000_000_000, "exploration_constant" : 1.414,
-    #         "time_limit" : 1800, "fitness_mode" : 1
-    #     }
-    # )
+    pipeline.add_solver(
+        name="MCTS",
+        solver_class=MCTSSolver,
+        params={"iterations" : 1_000_000_000, "exploration_constant" : 1.414,
+            "time_limit" : 1800, "fitness_mode" : 1
+        }
+    )
     
     pipeline.add_solver(
         name="Memetic",
         solver_class=MemeticSolver,
         params={
-            'pop_size': 300,           
-            'generations': 500,        
-            'tournament_size': 3,      
+            'pop_size': 600,           
+            'generations': 600,        
+            'tournament_size': 6,      
             'mutation_rate': 0.2,      
             'ls_rate': 0.8,            
             'ls_max_steps': 50,        
             'elitism_ratio': 0.1,      
-            'time_limit': 300.0,       
+            'time_limit': 900.0,       
             'fitness_mode': 1          
         }
     )
