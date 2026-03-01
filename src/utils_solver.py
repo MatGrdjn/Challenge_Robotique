@@ -24,11 +24,10 @@ def point_segment_distance(x1, y1, x2, y2, x0, y0):
 
 
 
-@njit(cache=True)
+@njit(cache=True, fastmath=True)
 def evaluate_path(path, cylinders, fitness_mode=0, V0=1.0, a=0.0698, b=3.0, b0=100.0, Tmax=600.0, Qmax=10000.0, R_col=0.45):
     """
-    Simule le parcours exact
-    Simule le parcours avec interruption de collision
+    Simule le parcours exact avec interruption de collision
     """
     visited = 0
     curr_x, curr_y = 0.0, 0.0
@@ -47,6 +46,7 @@ def evaluate_path(path, cylinders, fitness_mode=0, V0=1.0, a=0.0698, b=3.0, b0=1
             dy = target_y - curr_y
             D = math.sqrt(dx**2 + dy**2)
             
+
             if D < 1e-6:
                 visited |= (1 << target_idx)
                 M += cylinders[target_idx, 2]
@@ -57,8 +57,10 @@ def evaluate_path(path, cylinders, fitness_mode=0, V0=1.0, a=0.0698, b=3.0, b0=1
             min_t = D 
             
             for i in range(20):
-                if visited & (1 << i): continue
-                if i == target_idx: continue
+                if visited & (1 << i): 
+                    continue
+                if i == target_idx: 
+                    continue
                 
                 cx = cylinders[i, 0]
                 cy = cylinders[i, 1]
@@ -66,16 +68,19 @@ def evaluate_path(path, cylinders, fitness_mode=0, V0=1.0, a=0.0698, b=3.0, b0=1
                 vy = cy - curr_y
                 
                 dot = vx * dx + vy * dy
-                if dot <= 0: continue
+                if dot <= 0: 
+                    continue
                 
                 t = dot / max(D, 1e-12)
-                if t >= min_t: continue 
+                
+                if t - R_col >= min_t: 
+                    continue 
                 
                 d_sq = (vx**2 + vy**2) - t**2
                 
                 if d_sq <= R_col_sq:
                     dist_to_hit = t - math.sqrt(abs(R_col_sq - d_sq))
-                    if dist_to_hit < min_t:
+                    if -1e-5 < dist_to_hit < min_t:
                         min_t = dist_to_hit
                         hit_idx = i
 
@@ -94,7 +99,14 @@ def evaluate_path(path, cylinders, fitness_mode=0, V0=1.0, a=0.0698, b=3.0, b0=1
             
             if fitness_mode == 0:
                 if T + delta_T > Tmax or Q + delta_Q > Qmax:
-                    return (Reward * 1e10) + ((Qmax - Q) * 1e5) + (Tmax - T), Reward, Q, T
+                    ratio_Q = (Qmax - Q) / delta_Q if delta_Q > 0 else 0
+                    ratio_T = (Tmax - T) / delta_T if delta_T > 0 else 0
+                    ratio = min(ratio_Q, ratio_T)
+                    
+                    ratio = max(0.0, min(1.0, ratio))
+                    
+                    fitness = (Reward * 1e10) + (ratio * 1e7) + (Qmax - Q)
+                    return fitness, Reward, Q, T
             
             curr_x = actual_target_x
             curr_y = actual_target_y
@@ -106,7 +118,7 @@ def evaluate_path(path, cylinders, fitness_mode=0, V0=1.0, a=0.0698, b=3.0, b0=1
             Reward += cylinders[hit_idx, 3]
 
     if fitness_mode == 0:
-            fitness = (Reward * 1e10) + ((Qmax - Q) * 1e5) + (Tmax - T)
+        fitness = (Reward * 1e10) + 1e7 + ((Qmax - Q) * 1e5) + (Tmax - T)
     else:
         fitness = -(Q * 1e5) - T
 

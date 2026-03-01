@@ -6,6 +6,10 @@ from solvers.mcts_solver import MCTSSolver
 from solvers.sa_solver import SASolver
 from solvers.ga_solver import GASolver
 from solvers.parallel_runner import ParallelRunner
+from solvers.simple_solver import SimpleSolver
+from solvers.nearest_solver import NearestSolver
+from solvers.ratio_solver import RatioSolver
+from solvers.weight_ratio_solver import WeightedRatioSolver
 
 from visualizer import RouteVisualizer
 from robot_translator import RobotTranslator
@@ -81,4 +85,17 @@ def main():
     RouteVisualizer.plot_trajectory(cylinders, best_path, save_path="results/map_solution.png")
 
 if __name__ == "__main__":
-    main()
+    #main()
+    cylinders = load_real_instance("data/donnees-map1.txt")
+
+    ss = SimpleSolver()
+    ns = NearestSolver()
+    rs = RatioSolver()
+    ros = WeightedRatioSolver()
+
+    best_path, _ = ros.solve(cylinders)
+
+    translator = RobotTranslator(cylinders, start_x=0.0, start_y=0.0, start_angle=0.0)
+    translator.generate_script(best_path,"results/script_weight_ratio_solver.txt")
+
+    RouteVisualizer.plot_trajectory(cylinders, best_path, save_path="results/map_solution.png")

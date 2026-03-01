@@ -5,6 +5,7 @@ from solvers.ga_solver import GASolver
 from solvers.mcts_solver import MCTSSolver
 from solvers.beam_solver import BeamSearchSolver
 from solvers.memetic_solver import MemeticSolver
+from solvers.weight_ratio_solver import WeightedRatioSolver
 from pipeline import EvaluationPipeline
 
 def load_real_instance(filepath):
@@ -22,11 +23,10 @@ def main():
     RESULTS_DIR = "results"    
     UNITY_EXE = "C:/Users/Utilisateur/Documents/CoursCI2/Challenge/RunTime-2026-ultimate/challenge-robotique.exe"
 
-    # target_map = "donnees-map1.txt"
+    #target_map = "donnees-map2.txt"
     target_map = None
     
     pipeline = EvaluationPipeline(DATA_DIR, RESULTS_DIR, UNITY_EXE)
-
 
     
     pipeline.add_solver(
@@ -34,7 +34,7 @@ def main():
         solver_class=SASolver,
         params={
             't_init': 10000.0, 't_final': 0.001, 'alpha': 0.99999, 
-            'time_limit': 900.0, 'fitness_mode': 1
+            'time_limit': 900.0, 'fitness_mode': 0
         }
     )
     
@@ -43,7 +43,7 @@ def main():
         solver_class=BeamSearchSolver,
         params={
             "beam_width" : 500_000,
-            "fitness_mode" : 1
+            "fitness_mode" : 0
         }
     )
 
@@ -53,7 +53,7 @@ def main():
         params={
             "pop_size" : 2000, "generations" : 5000, "tournament_size" : 20, 
             "mutation_rate" : 0.3, "elitism_ratio" : 0.05, "time_limit" : 900,
-            "fitness_mode" : 1
+            "fitness_mode" : 0
         }
     )
 
@@ -61,7 +61,7 @@ def main():
         name="MCTS",
         solver_class=MCTSSolver,
         params={"iterations" : 1_000_000_000, "exploration_constant" : 1.414,
-            "time_limit" : 1800, "fitness_mode" : 1
+            "time_limit" : 1800, "fitness_mode" : 0
         }
     )
     
@@ -77,8 +77,33 @@ def main():
             'ls_max_steps': 50,        
             'elitism_ratio': 0.1,      
             'time_limit': 900.0,       
-            'fitness_mode': 1          
+            'fitness_mode': 0          
         }
+    )
+
+
+    pipeline.add_solver(
+        name="Ratio_Original_49",
+        solver_class=WeightedRatioSolver,
+        params={'wp': 1.0, 'wd': 1.0, 'wm': 0.0}
+    )
+
+    pipeline.add_solver(
+        name="Ratio_Mass_Aversion",
+        solver_class=WeightedRatioSolver,
+        params={'wp': 1.0, 'wd': 1.0, 'wm': 1.5}
+    )
+
+    pipeline.add_solver(
+        name="Ratio_Distance_Hater",
+        solver_class=WeightedRatioSolver,
+        params={'wp': 1.0, 'wd': 2.0, 'wm': 0.5}
+    )
+
+    pipeline.add_solver(
+        name="Ratio_Point_Lover",
+        solver_class=WeightedRatioSolver,
+        params={'wp': 2.0, 'wd': 1.0, 'wm': 0.5}
     )
 
     # Lancement de toute la batterie de tests
